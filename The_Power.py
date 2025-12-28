@@ -353,7 +353,7 @@ YELLOW = "\033[93m"
 CYAN = "\033[96m"
 RESET = "\033[0m"
 
-MY_IP = "192.168.1.192"   
+MY_IP = get_ip_address()   
 
 def get_devices():
     result = subprocess.run(
@@ -1014,6 +1014,7 @@ exploit
 
 else:
     print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
+
 
 
 
