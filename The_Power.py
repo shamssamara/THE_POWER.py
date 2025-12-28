@@ -2,53 +2,64 @@ import pyfiglet
 from colorama import init, Fore, Style
 import shutil
 
+# تفعيل دعم الألوان
 init()
 
-
+# --- إعدادات النص والألوان ---
 FONT_STYLE = "slant" 
-RED_COLOR = Fore.RED      
-BLUE_COLOR = Fore.BLUE   
-WHITE_COLOR = Fore.WHITE  
+RED_COLOR = Fore.RED      # لون "THE" والخط العلوي
+BLUE_COLOR = Fore.BLUE    # لون "POWER" والخط السفلي
+WHITE_COLOR = Fore.WHITE  # لون محايد للمسافات
 
+# 1. توليد النص "THE" و "POWER"
 ascii_the = pyfiglet.figlet_format("THE", font=FONT_STYLE)
 the_lines = [RED_COLOR + line.rstrip() + Style.RESET_ALL for line in ascii_the.split('\n')]
 
 ascii_power = pyfiglet.figlet_format("POWER", font=FONT_STYLE)
 power_lines = [BLUE_COLOR + line.lstrip() + Style.RESET_ALL for line in ascii_power.split('\n')]
 
+# 2. دمج الكلمات
 final_banner_lines = []
 max_height = max(len(the_lines), len(power_lines))
 
+# موازنة ارتفاع الكلمات
 while len(the_lines) < max_height:
     the_lines.append("")
 while len(power_lines) < max_height:
     power_lines.append("")
 
+# الفاصل الآن هو مسافة بيضاء بسيطة
 SEPARATOR_SPACE = "   " 
 
 for i in range(max_height):
     the_part = the_lines[i]
     power_part = power_lines[i]
     
+    # دمج الكلمتين في سطر واحد
     combined_line = f"{the_part.rstrip()}{SEPARATOR_SPACE}{power_part.lstrip()}"
     final_banner_lines.append(combined_line)
 
+# حساب عرض الشعار المدمج للتوسيط
 try:
     terminal_width = shutil.get_terminal_size().columns
 except:
     terminal_width = 80
 
+# 3. طباعة الشعار النهائي
 print("\n")
 
+# الخط الفاصل العلوي باللون الأحمر
 TOP_FRAME = RED_COLOR + "═" * 60 + Style.RESET_ALL
 print(TOP_FRAME.center(terminal_width))
 
 for line in final_banner_lines:
     print(line.center(terminal_width))
 
+# الخط الفاصل السفلي باللون الأزرق
 BOTTOM_FRAME = BLUE_COLOR + "═" * 60 + Style.RESET_ALL
 print(BOTTOM_FRAME.center(terminal_width))
 
+# print("\n")
 
 
 
@@ -312,6 +323,7 @@ print(banner)
 import subprocess
 
 def get_ip_address():
+    # تنفيذ أمر ifconfig مع grep لاستخراج عناوين الـ IP
     result = subprocess.run(
         "ifconfig | grep -oP 'inet\\s+\\K[0-9.]+'",
         shell=True,
@@ -319,6 +331,7 @@ def get_ip_address():
         text=True
     )
 
+    # نخزن الـ output ونختار أول IP غير 127.0.0.1
     lines = result.stdout.strip().split('\n')
     ips = [ip for ip in lines if ip != "127.0.0.1"]
 
@@ -353,7 +366,7 @@ YELLOW = "\033[93m"
 CYAN = "\033[96m"
 RESET = "\033[0m"
 
-MY_IP = get_ip_address()   
+MY_IP = get_ip_address() 
 
 def get_devices():
     result = subprocess.run(
@@ -397,7 +410,70 @@ TARGET_IP = target
 
 
 
-nmap_output = ""  
+
+
+
+
+
+
+
+
+
+
+# ================== SCAN CUSTOMIZATION ==================
+
+print("""
+Select scan type:
+1) Stealth Scan (Low noise)
+2) Deep Scan (Balanced)
+3) Aggressive Scan (Loud)
+""")
+
+scan_choice = input("Enter choice (1/2/3): ").strip()
+
+if scan_choice == "1":
+    SCAN_ARGS = ["-sS", "-T2", "--max-retries", "2"]
+elif scan_choice == "2":
+    SCAN_ARGS = ["-sS", "-sV", "-O", "-T4"]
+elif scan_choice == "3":
+    SCAN_ARGS = ["-A", "-sV", "-O", "-sC", "-T5"]
+else:
+    SCAN_ARGS = ["-sS", "-sV", "-O", "-T4"]
+
+print("""
+Select ports:
+1) Common ports
+2) All ports
+3) Custom ports
+""")
+
+port_choice = input("Enter choice (1/2/3): ").strip()
+
+if port_choice == "1":
+    PORTS = "21,22,23,25,53,80,110,139,143,443,445,3306,3389"
+elif port_choice == "2":
+    PORTS = "1-65535"
+elif port_choice == "3":
+    PORTS = input("Enter ports (e.g. 80,443,8080): ").strip()
+else:
+    PORTS = "80,443"
+
+# ========================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+nmap_output = ""  # افتراضياً فارغة
 
 # def is_port_open(port):
 #     return f"{port}/tcp open" in nmap_output
@@ -421,20 +497,28 @@ else:
         print(f"🚀 Starting scan on: {target}\n")
 
         # Run nmap with proper arguments
+        # result = subprocess.run([
+        #     "nmap",
+        #     "-A",
+        #     "-sV",
+        #     "--version-intensity", "9",
+        #     "-O",
+        #     "--osscan-guess",
+        #     "-sC",
+        #     "-T5",
+        #     "-vv",
+        #     "-p", "21,445,3306,3389,80",
+        #      "-oX",nmap_xml,
+        #     target
+        # ], capture_output=True, text=True, timeout=300)
         result = subprocess.run([
-            "nmap",
-            "-A",
-            "-sV",
-            "--version-intensity", "9",
-            "-O",
-            "--osscan-guess",
-            "-sC",
-            "-T5",
-            "-vv",
-            "-p", "21,445,3306,3389,80",
-             "-oX",nmap_xml,
-            target
-        ], capture_output=True, text=True, timeout=300)
+    "nmap",
+    *SCAN_ARGS,
+    "-vv",
+    "-p", PORTS,
+    "-oX", nmap_xml,
+    TARGET_IP
+], capture_output=True, text=True, timeout=600)
 
         # Print the full output exactly like nmap
         print(result.stdout)
@@ -464,10 +548,12 @@ def parse_nmap_os(xml_file):
     ports_info = {}
     os_detected = None
 
+    # محاولة الحصول على أفضل OS
     os_match = root.find("host/os/osmatch")
     if os_match is not None:
         os_detected = os_match.attrib.get("name")
 
+    # لكل منفذ
     for port in root.findall("host/ports/port"):
         portid = port.attrib.get("portid")
         service_elem = port.find("service")
@@ -475,7 +561,7 @@ def parse_nmap_os(xml_file):
 
         ports_info[portid] = {
             "service": service_name,
-            "os": os_detected  
+            "os": os_detected  # يمكن تخصيص لكل منفذ إذا وجد OS لكل service
         }
     return ports_info
 
@@ -501,6 +587,7 @@ services = {}
 tree = ET.parse("scan.xml")
 root = tree.getroot()
 
+# استخراج نظام التشغيل
 os_name = "Unknown"
 os_elem = root.find(".//osmatch")
 if os_elem is not None:
@@ -684,6 +771,50 @@ if is_port_open(80):
 
 
 
+known_ports = ["21", "445", "3306", "3389", "80"]
+
+
+
+
+
+
+
+
+
+
+for port, info in services.items():
+    if port not in known_ports:
+        print("\n🛡️🛡️  \033[94mPenetration Testing Report – Generic Service Exposure\033[0m")
+        print(
+            f"Finding ID: PT-GEN-{port}\n"
+            "Severity: Medium\n"
+            "Date: 2025\n"
+            f"Target: {TARGET_IP}\n"
+            f"Service: {info['service']}\n"
+            f"Version: {info['version']}\n"
+            f"Port: {port}/TCP (Open)\n"
+            f"OS Detected: {info['os']}\n"
+        )
+
+        print(
+            "\033[92mRecommendation:\n"
+            "- Review the necessity of this service.\n"
+            "- Restrict access using firewall rules.\n"
+            "- Update the service to the latest supported version.\n"
+            "- Monitor logs for suspicious activity.\033[0m"
+        )
+
+
+
+
+
+
+
+
+
+
+
+
 # import subprocess
 # import tempfile
 
@@ -761,6 +892,7 @@ import subprocess
 import tempfile
 import re
 
+# الملفات الافتراضية
 default_user_file = "/home/shams/Desktop/project/users.txt"
 default_pass_file = "/home/shams/Desktop/project/password.txt"
 
@@ -769,9 +901,11 @@ choice = input("\n\033[93mDo you want to run SMB brute-force attack using Metasp
 if choice in ["yes", "y"]:
     print("\n\033[91m[!] Launching Metasploit... executing SMB brute-force module...\033[0m\n")
     
+    # نسأل المستخدم عن مسار الملفات مع افتراضيات
     user_file = input(f"\033[93mEnter the full path to the users file [{default_user_file}]: \033[0m").strip()
     pass_file = input(f"\033[93mEnter the full path to the passwords file [{default_pass_file}]: \033[0m").strip()
 
+    # إذا لم يدخل المستخدم شيء، نستخدم المسارات الافتراضية
     if not user_file:
         user_file = default_user_file
     if not pass_file:
@@ -1014,8 +1148,6 @@ exploit
 
 else:
     print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
-
-
 
 
 
