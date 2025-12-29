@@ -44,4 +44,9 @@ Blue Team & Offensive Security Mindset
 This project was developed independently and is not affiliated with,
 sponsored by, or developed as part of any university coursework.
 
+### Academic Notice
+This project may be demonstrated for academic or presentation purposes only.
+No rights are granted for reuse, modification, or redistribution without explicit written permission from the author.
+
+
 © 2025 Shams Samara. All rights reserved.
