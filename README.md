@@ -1,7 +1,7 @@
 # THE_POWER.py
 Developed by Shams Samara
 Cybersecurity engineer
-
+Copyright (c) 2025 Shams Samara
 <img width="359" height="610" alt="image" src="https://github.com/user-attachments/assets/d57cfbd2-198d-4b41-928f-6a1ac0af907d" />
 
 Developed by Shams Samara – Cybersecurity Engineer
@@ -22,3 +22,4 @@ Educational penetration testing
 Controlled internal testing environments
 ⚠️ Disclaimer
 This tool is intended for educational and authorized security testing only. Unauthorized use is strictly prohibited.
+Copyright (c) 2025 Shams Samara
