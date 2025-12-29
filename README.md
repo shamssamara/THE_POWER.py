@@ -40,4 +40,8 @@ Shams Samara
 Cybersecurity Engineer
 Blue Team & Offensive Security Mindset
 
+
+This project was developed independently and is not affiliated with,
+sponsored by, or developed as part of any university coursework.
+
 © 2025 Shams Samara. All rights reserved.
