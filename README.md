@@ -9,20 +9,35 @@ Developed by Shams Samara – Cybersecurity Engineer
 THE_POWER.py is a lightweight, interactive Python tool that automates web directory enumeration using Gobuster.
 It prompts the user before execution and allows flexible customization of target paths, ensuring safe and controlled usage during assessments.
 The tool is designed with a real penetration testing mindset, focusing on accuracy, simplicity, and user control rather than blind automation.
+
+
 🎯 Primary Focus
-THE_POWER.py is tailored for testing legacy web environments, with a direct emphasis on Windows Server 2008 web servers, commonly found in labs, outdated enterprise infrastructures, and training scenarios.
+This tool is specifically tailored for assessing legacy web environments, with a strong emphasis on:
+🖥️ Windows Server 2008 web servers
+🧪 Security labs and training environments
+🏢 Outdated enterprise infrastructures still found in real-world networks
+These environments often require careful, manual-style enumeration — which is exactly what THE_POWER.py facilitates.
 🚀 Key Features
-Interactive user confirmation before execution
-Customizable target paths
-Automated Gobuster-based directory enumeration
-Lightweight and easy to integrate into larger pentesting workflows
+🔐 Interactive confirmation before execution
+Prevents accidental scans and enforces tester awareness
+🎯 Customizable target paths
+Full flexibility based on assessment scope
+⚙️ Automated Gobuster execution
+Saves time while preserving accuracy
+🧩 Lightweight & modular design
+Easy to integrate into larger pentesting workflows
 🧪 Use Cases
-Security labs
-Legacy Windows web server assessments
-Educational penetration testing
-Controlled internal testing environments
+🧠 Educational penetration testing
+🧪 Security training labs
+🖥️ Legacy Windows web server assessments
+🔒 Authorized internal security testing
 ⚠️ Disclaimer
-This tool is intended for educational and authorized security testing only. Unauthorized use is strictly prohibited.
-Copyright (c) 2025 Shams Samara
+This tool is intended strictly for educational purposes and authorized security testing.
+Any unauthorized use is illegal and strictly prohibited.
+The developer assumes no responsibility for misuse of this tool.
+👨‍💻 Author
+Shams Samara
+Cybersecurity Engineer
+Blue Team & Offensive Security Mindset
 
 © 2025 Shams Samara. All rights reserved.
