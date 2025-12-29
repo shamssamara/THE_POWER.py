@@ -24,3 +24,5 @@ Controlled internal testing environments
 ⚠️ Disclaimer
 This tool is intended for educational and authorized security testing only. Unauthorized use is strictly prohibited.
 Copyright (c) 2025 Shams Samara
+
+© 2025 Shams Samara. All rights reserved.
