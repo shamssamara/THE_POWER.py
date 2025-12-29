@@ -1,6 +1,7 @@
 # THE_POWER.py
 Developed by Shams Samara
 Cybersecurity engineer
+
 Copyright (c) 2025 Shams Samara
 <img width="359" height="610" alt="image" src="https://github.com/user-attachments/assets/d57cfbd2-198d-4b41-928f-6a1ac0af907d" />
 
