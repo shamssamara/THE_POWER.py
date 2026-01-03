@@ -358,7 +358,53 @@ if __name__ == "__main__":
 
 
 
+# import subprocess
+
+# # Colors
+# GREEN = "\033[92m"
+# YELLOW = "\033[93m"
+# CYAN = "\033[96m"
+# RESET = "\033[0m"
+
+# MY_IP = get_ip_address() 
+
+# def get_devices():
+#     result = subprocess.run(
+#         "fping -a -g 192.168.1.0/24 2>/dev/null",
+#         shell=True,
+#         capture_output=True,
+#         text=True
+#     )
+#     devices = result.stdout.strip().split('\n')
+#     return [d for d in devices if d]
+
+# def ask_and_show_devices():
+#     answer = input("\033[95mWould you like to know the devices on your network? (y/n): \033[0m").strip().lower()
+
+#     if answer in ("y", "yes"):
+#         devices = get_devices()
+#         if devices:
+#             print(f"{CYAN}Devices found on your network:{RESET}")
+#             for d in devices:
+#                 if d == MY_IP:
+#                     print(f"{GREEN}- {d}  (Your device){RESET}")
+#                 else:
+#                     print(f"{YELLOW}- {d}  (Victim){RESET}")
+#         else:
+#             print("No devices detected.")
+#     else:
+#         print("Okay, not scanning the network.")
+
+# if __name__ == "__main__":
+#     ask_and_show_devices()
+
+
+
+
+
+
 import subprocess
+import psutil  # للحصول على IPs لكل واجهة
 
 # Colors
 GREEN = "\033[92m"
@@ -366,11 +412,44 @@ YELLOW = "\033[93m"
 CYAN = "\033[96m"
 RESET = "\033[0m"
 
-MY_IP = get_ip_address() 
+def get_all_my_ips():
+    ip_dict = {}
+    addrs = psutil.net_if_addrs()
+    for iface, snics in addrs.items():
+        for snic in snics:
+            if snic.family.name == "AF_INET":  # IPv4 فقط
+                ip_dict[snic.address] = iface
+    return ip_dict
 
-def get_devices():
+def select_my_ip(ip_dict):
+    print(f"{CYAN}Your device has these IPs:{RESET}")
+    for i, (ip, iface) in enumerate(ip_dict.items(), 1):
+        print(f"{i}. {ip} ({iface})")
+
+    choice = input("\033[95mChoose the IP (number or IP address): \033[0m").strip()
+
+    # إذا أدخل IP مباشرة
+    if choice in ip_dict:
+        print(f"{GREEN}You selected {choice} on interface {ip_dict[choice]}{RESET}\n")
+        return choice, ip_dict[choice]
+
+    # إذا أدخل رقم
+    try:
+        choice = int(choice)
+        if 1 <= choice <= len(ip_dict):
+            selected_ip = list(ip_dict.keys())[choice - 1]
+            print(f"{GREEN}You selected {selected_ip} on interface {ip_dict[selected_ip]}{RESET}\n")
+            return selected_ip, ip_dict[selected_ip]
+    except:
+        pass
+
+    print(f"{YELLOW}Invalid choice, using first IP by default.{RESET}")
+    first_ip = list(ip_dict.keys())[0]
+    return first_ip, ip_dict[first_ip]
+
+def get_devices(network_prefix):
     result = subprocess.run(
-        "fping -a -g 192.168.1.0/24 2>/dev/null",
+        f"fping -a -g {network_prefix}.0/24 2>/dev/null",
         shell=True,
         capture_output=True,
         text=True
@@ -378,15 +457,15 @@ def get_devices():
     devices = result.stdout.strip().split('\n')
     return [d for d in devices if d]
 
-def ask_and_show_devices():
-    answer = input("\033[95mWould you like to know the devices on your network? (y/n): \033[0m").strip().lower()
-
+def ask_and_show_devices(selected_ip):
+    network_prefix = ".".join(selected_ip.split(".")[:3])
+    answer = input("\033[95mDo you want to scan devices on this network? (y/n): \033[0m").strip().lower()
     if answer in ("y", "yes"):
-        devices = get_devices()
+        devices = get_devices(network_prefix)
         if devices:
             print(f"{CYAN}Devices found on your network:{RESET}")
             for d in devices:
-                if d == MY_IP:
+                if d == selected_ip:
                     print(f"{GREEN}- {d}  (Your device){RESET}")
                 else:
                     print(f"{YELLOW}- {d}  (Victim){RESET}")
@@ -396,17 +475,70 @@ def ask_and_show_devices():
         print("Okay, not scanning the network.")
 
 if __name__ == "__main__":
-    ask_and_show_devices()
+    ip_dict = get_all_my_ips()
+    selected_ip, iface = select_my_ip(ip_dict)
+    ask_and_show_devices(selected_ip)
+
+
+
+
+
+
+
+
+
+
+
 
 
 import subprocess
 import shutil
+
+
+
+
+
+
 
 # Target IP
 target = input("\033[96mEnter your IP to scan: \033[0m")
 print(f"You entered: {target}")
 
 TARGET_IP = target
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ===================== CHECK IF HOST IS UP =====================
+def host_up_warning(ip):
+    print("\n\033[96m[*] Checking if the host is up via ping...\033[0m")
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["ping", "-c", "1", "-W", "2", ip],
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            print(f"\033[91m[-] Host {ip} did not respond to ping.\033[0m")
+            print("\033[93m[!] Suggestion: You may want to use the Nmap '-Pn' option to skip host discovery.\033[0m\n")
+        else:
+            print(f"\033[92m[+] Host {ip} is up and responding.\033[0m\n")
+    except Exception as e:
+        print(f"\033[91m[!] Ping check failed: {e}\033[0m\n")
+
+host_up_warning(TARGET_IP)
+# ================================================================
+
 
 
 
