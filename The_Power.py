@@ -490,6 +490,78 @@ if __name__ == "__main__":
 
 
 
+import psutil
+
+# ==================== اختيار IP من المستخدم ====================
+def get_all_my_ips():
+    ip_dict = {}
+    addrs = psutil.net_if_addrs()
+    for iface, snics in addrs.items():
+        for snic in snics:
+            if snic.family.name == "AF_INET":  # IPv4 فقط
+                if snic.address != "127.0.0.1":
+                    ip_dict[snic.address] = iface
+    return ip_dict
+
+def select_my_ip(ip_dict):
+    print("Your device has these IPs:")
+    for i, (ip, iface) in enumerate(ip_dict.items(), 1):
+        print(f"{i}. {ip} ({iface})")
+
+    choice = input("Choose the IP (number or IP address): ").strip()
+
+    # إذا أدخل IP مباشرة
+    if choice in ip_dict:
+        print(f"You selected {choice} on interface {ip_dict[choice]}")
+        return choice
+
+    # إذا أدخل رقم
+    try:
+        choice = int(choice)
+        if 1 <= choice <= len(ip_dict):
+            selected_ip = list(ip_dict.keys())[choice - 1]
+            print(f"You selected {selected_ip} on interface {ip_dict[selected_ip]}")
+            return selected_ip
+    except:
+        pass
+
+    # القيمة الافتراضية أول IP
+    first_ip = list(ip_dict.keys())[0]
+    print(f"Invalid choice, using first IP by default: {first_ip}")
+    return first_ip
+
+# ==================== التعيين التلقائي لـ LHOST ====================
+ip_dict = get_all_my_ips()
+LHOST = select_my_ip(ip_dict)  # الآن LHOST تم تعيينه مباشرة على IP الذي اختاره المستخدم
+print(f"LHOST is set to: {LHOST}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 import subprocess
 import shutil
@@ -564,13 +636,13 @@ Select scan type:
 scan_choice = input("Enter choice (1/2/3): ").strip()
 
 if scan_choice == "1":
-    SCAN_ARGS = ["-sS", "-T2", "--max-retries", "2"]
+    SCAN_ARGS = ["-sS", "-T2", "--max-retries", "2", "-Pn"]
 elif scan_choice == "2":
-    SCAN_ARGS = ["-sS", "-sV", "-O", "-T4"]
+    SCAN_ARGS = ["-sS", "-sV", "-O", "-Pn", "-T4"]
 elif scan_choice == "3":
-    SCAN_ARGS = ["-A", "-sV", "-O", "-sC", "-T5"]
+    SCAN_ARGS = ["-A", "-sV", "-O", "-Pn", "-sC", "-T5"]
 else:
-    SCAN_ARGS = ["-sS", "-sV", "-O", "-T4"]
+    SCAN_ARGS = ["-sS", "-sV", "-O", "-Pn", "-T4"]
 
 print("""
 Select ports:
