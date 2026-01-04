@@ -820,6 +820,26 @@ for port in root.findall(".//port"):
 
 
 
+
+
+
+
+
+
+
+SMB_BRUTE_SUCCESS = False
+
+
+
+
+
+
+
+
+
+
+
+
 if is_port_open(21):
  if "21" in services:
   
@@ -963,6 +983,20 @@ if is_port_open(80):
 
   print("\033[92msolution HTTP: Update or remove the service if you no longer need it.\n\n"
       "Disable HTTP entirely if not required, or replace it with https for secure information such as login page.\033[0m")
+
+
+
+
+
+
+
+
+# ports_opened = list of open ports detected by nmap
+# مثال: ports_opened = [22, 80, 3389, 5985]
+
+
+
+
 
 
 
@@ -1181,8 +1215,8 @@ def smb_bruteforce_conditions_met():
         return False, "Service is not SMB"
 
 
-    if "Windows" not in services["445"]["os"]:
-        return False, "Target OS is not Windows"
+    # if "Windows" not in services["445"]["os"]:
+    #     return False, "Target OS is not Windows"
 
     return True, "Conditions met"
 
@@ -1248,11 +1282,11 @@ def rdp_conditions_met():
     if "3389" not in services:
         return False, "RDP service not detected"
 
-    if services["3389"]["service"] not in ["ms-wbt-server", "rdp", "ssl/ms-wbt-server"]:
-        return False, "Service is not RDP"
+    # if services["3389"]["service"] not in ["ms-wbt-server", "rdp", "ssl/ms-wbt-server"]:
+    #     return False, "Service is not RDP"
 
-    if "Windows" not in services["3389"]["os"]:
-        return False, "Target OS is not Windows"
+    # if "Windows" not in services["3389"]["os"]:
+    #     return False, "Target OS is not Windows"
 
     return True, "Conditions met"
 
@@ -1331,6 +1365,7 @@ exit
             break
 
     if FOUND_CREDS:
+        SMB_BRUTE_SUCCESS = True
         print("\033[92m[+] Successful credentials found!\033[0m")
         print(f"\033[94m[*] Raw Line:\033[0m {FOUND_CREDS}")
 
@@ -1755,3 +1790,46 @@ exploit
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+"Created By {Fore.RED}SHAMS{Style.RESET_ALL} {Fore.CYAN}SAMARA{Style.RESET_ALL}"
+
+
+
+from colorama import Fore, Style
+import shutil
+
+terminal_width = shutil.get_terminal_size().columns
+
+signature_text = Fore.WHITE + Style.BRIGHT +"""
+   ____                _           _   _                                        
+  / ___|_ __ ___  __ _| |_ ___  __| | | |__  _   _                              
+ | |   | '__/ _ \/ _` | __/ _ \/ _` | | '_ \| | | |                             
+ | |___| | |  __/ (_| | ||  __/ (_| | | |_) | |_| |                             
+  \____|_|  \___|\__,_|\__\___|\__,_| |_.__/ \__, |                             
+  ____  _   _    _    __  __ ____    ____    |___/__  __    _    ____      _    
+ / ___|| | | |  / \  |  \/  / ___|  / ___|  / \  |  \/  |  / \  |  _ \    / \   
+ \___ \| |_| | / _ \ | |\/| \___ \  \___ \ / _ \ | |\/| | / _ \ | |_) |  / _ \  
+  ___) |  _  |/ ___ \| |  | |___) |  ___) / ___ \| |  | |/ ___ \|  _ <  / ___ \ 
+ |____/|_| |_/_/   \_\_|  |_|____/  |____/_/   \_\_|  |_/_/   \_\_| \_\/_/   \_                                                                                                                                                                                            
+"""+ Style.RESET_ALL
+
+print(signature_text.center(terminal_width))
+
+print("\n")
