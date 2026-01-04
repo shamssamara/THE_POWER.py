@@ -2,7 +2,7 @@
 Developed by Shams Samara
 Cybersecurity engineer
 
-Copyright (c) 2025 Shams Samara
+Copyright (c) 2026 Shams Samara
 <img width="359" height="610" alt="image" src="https://github.com/user-attachments/assets/d57cfbd2-198d-4b41-928f-6a1ac0af907d" />
 
 Developed by Shams Samara – Cybersecurity Engineer
@@ -49,4 +49,4 @@ This project may be demonstrated for academic or presentation purposes only.
 No rights are granted for reuse, modification, or redistribution without explicit written permission from the author.
 
 
-© 2025 Shams Samara. All rights reserved.
+© 2026 Shams Samara. All rights reserved.
