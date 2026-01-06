@@ -692,7 +692,7 @@ def is_port_open(port):
 
 
 
-nmap_xml = "scan.xml"
+nmap_xml = "scan_output.xml"
 # Check if nmap is installed
 if shutil.which("nmap") is None:
     print("❌ nmap is not installed. Please run: sudo apt install nmap")
@@ -776,14 +776,14 @@ def parse_nmap_os(xml_file):
 import os
 import xml.etree.ElementTree as ET
 
-xml_file = "scan_output.xml"
+
 
 # تحقق من الملف
-if os.path.exists(xml_file) and os.path.getsize(xml_file) > 0:
-    tree = ET.parse(xml_file)
+if os.path.exists(nmap_xml) and os.path.getsize(nmap_xml) > 0:
+    tree = ET.parse(nmap_xml)
     services = tree.getroot()
 else:
-    print(f"❌ Error: XML file '{xml_file}' is empty or was not created properly.")
+    print(f"❌ Error: XML file '{nmap_xml}' is empty or was not created properly.")
     services = []
 
 
@@ -798,36 +798,48 @@ import os
 import xml.etree.ElementTree as ET
 
 services = {}
+xml_file = "scan_output.xml"
 
-tree = ET.parse("scan.xml")
-root = tree.getroot()
+# التأكد من أن الملف موجود وغير فارغ
+if not os.path.exists(xml_file) or os.path.getsize(xml_file) == 0:
+    print(f"❌ Error: XML file '{xml_file}' is empty or لم يُنشأ بشكل صحيح.")
+else:
+    tree = ET.parse(xml_file)
+    root = tree.getroot()
 
-# استخراج نظام التشغيل
-os_name = "Unknown"
-os_elem = root.find(".//osmatch")
-if os_elem is not None:
-    os_name = os_elem.attrib.get("name", "Unknown")
+    # استخراج نظام التشغيل
+    os_elem = root.find(".//osmatch")
+    os_name = os_elem.attrib.get("name", "Unknown") if os_elem is not None else "Unknown"
 
-for port in root.findall(".//port"):
-    portid = port.attrib["portid"]
-    state = port.find("state").attrib["state"]
+    for port in root.findall(".//port"):
+        portid = port.attrib.get("portid", "Unknown")
 
-    if state != "open":
-        continue
+        # تحقق من وجود عنصر state
+        state_elem = port.find("state")
+        if state_elem is None:
+            continue
 
-    service_elem = port.find("service")
-    service_name = service_elem.attrib.get("name", "unknown")
-    product = service_elem.attrib.get("product", "")
-    version = service_elem.attrib.get("version", "")
-    extrainfo = service_elem.attrib.get("extrainfo", "")
+        state = state_elem.attrib.get("state", "unknown")
+        if state != "open":
+            continue
 
-    full_version = " ".join(filter(None, [product, version, extrainfo]))
+        # تحقق من وجود عنصر service
+        service_elem = port.find("service")
+        service_name = service_elem.attrib.get("name", "unknown") if service_elem is not None else "unknown"
+        product = service_elem.attrib.get("product", "") if service_elem is not None else ""
+        version = service_elem.attrib.get("version", "") if service_elem is not None else ""
+        extrainfo = service_elem.attrib.get("extrainfo", "") if service_elem is not None else ""
 
-    services[portid] = {
-        "service": service_name,
-        "version": full_version if full_version else "Unknown",
-        "os": os_name
-    }
+        full_version = " ".join(filter(None, [product, version, extrainfo]))
+
+        services[portid] = {
+            "service": service_name,
+            "version": full_version if full_version else "Unknown",
+            "os": os_name
+        }
+
+    print(services)  # طباعة النتيجة للتأكد
+
 
 
 
