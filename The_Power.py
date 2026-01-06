@@ -722,7 +722,7 @@ else:
     "-p", PORTS,
     "-oX", nmap_xml,
     TARGET_IP
-], capture_output=True, text=True, timeout=600)
+], capture_output=True, text=True, timeout=3600)
 
         # Print the full output exactly like nmap
         print(result.stdout)
@@ -773,7 +773,18 @@ def parse_nmap_os(xml_file):
 
 
 
+import os
+import xml.etree.ElementTree as ET
 
+xml_file = "scan_output.xml"
+
+# تحقق من الملف
+if os.path.exists(xml_file) and os.path.getsize(xml_file) > 0:
+    tree = ET.parse(xml_file)
+    services = tree.getroot()
+else:
+    print(f"❌ Error: XML file '{xml_file}' is empty or was not created properly.")
+    services = []
 
 
 
